@@ -26,7 +26,7 @@ class DBMongoQueryBuilder<T> {
 			conditions[kName]?.forEach((checker) => {
 				Object.entries(checker).forEach(([operator, value]) => {
 					const oprt = OPERATOR_MAPPER[operator as keyof typeof OPERATOR_MAPPER];
-					tokens[kName] = { [oprt]: value };
+					tokens[kName === 'id' ? '_id' : kName] = { [oprt]: value };
 				});
 			});
 		}
