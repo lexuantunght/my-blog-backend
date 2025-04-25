@@ -67,7 +67,10 @@ class DBSQLiteQueryBuilder<T> {
 	createQuery(options: DBQueryOptions<T>) {
 		const { limit, conditions } = options;
 		const selector = this.toValidArray(options.selector);
-		const orderBy = this.toValidArray(options.orderBy);
+		const orderBy = (Array.isArray(options.orderBy) ? options.orderBy : [options.orderBy]).map(
+			(s: keyof T | [keyof T, 'asc' | 'desc'] | undefined) =>
+				Array.isArray(s) ? [s[0], s[1].toUpperCase()].join(' ') : `${s as string} ASC`
+		);
 		const tokens: string[] = [];
 		tokens.push(`SELECT ${selector.length > 0 ? selector.join(',') : '*'} FROM ${this.tableName}`);
 		if (conditions) {
@@ -88,6 +91,7 @@ class DBSQLiteQueryBuilder<T> {
 		if (conditions) {
 			tokens.push(this.createConditions(conditions));
 		}
+		tokens.push('RETURNING *');
 		return tokens.join(' ');
 	}
 
@@ -100,6 +104,7 @@ class DBSQLiteQueryBuilder<T> {
 		tokens.push(
 			`${data.map((item) => `(${columns.map((col) => this.toValidValue(col, item[col])).join(',')})`).join(', ')}`
 		);
+		tokens.push('RETURNING *');
 		return tokens.join(' ');
 	}
 
@@ -113,6 +118,7 @@ class DBSQLiteQueryBuilder<T> {
 		if (conditions) {
 			tokens.push(this.createConditions(conditions));
 		}
+		tokens.push('RETURNING *');
 		return tokens.join(' ');
 	}
 

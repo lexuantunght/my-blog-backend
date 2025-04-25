@@ -1,13 +1,13 @@
 export type DBTableSchema<T> = { [K in keyof T]: DBEntityValue };
 
-type DBQueryConditions<V> = Record<DBQueryOperations, V>;
+type DBQueryConditions<V> = Partial<Record<DBQueryOperations, V>>;
 
 export type DBQueryOperations = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte';
 
 export type DBQueryOptions<T> = Partial<{
 	selector: Array<keyof T> | keyof T;
 	limit: number;
-	orderBy: Array<keyof T> | keyof T;
+	orderBy: Array<keyof T> | keyof T | Array<[keyof T, 'asc' | 'desc']>;
 	conditions: Partial<{ [K in keyof T]: Array<DBQueryConditions<T[K]>> }>;
 }>;
 
@@ -16,7 +16,7 @@ export type DBDeleteOptions<T> = {
 };
 
 export type DBInsertOptions<T> = {
-	data: T[];
+	data: Array<Partial<T>>;
 };
 
 export type DBUpdateOptions<T> = {
@@ -26,9 +26,9 @@ export type DBUpdateOptions<T> = {
 
 export interface DBTableAdapter<T> {
 	getAll(options: DBQueryOptions<T>): Promise<T[]>;
-	delete(options: DBDeleteOptions<T>): Promise<void>;
-	update(options: DBUpdateOptions<T>): Promise<void>;
-	insert(options: DBInsertOptions<T>): Promise<void>;
+	delete(options: DBDeleteOptions<T>): Promise<T[]>;
+	update(options: DBUpdateOptions<T>): Promise<T[]>;
+	insert(options: DBInsertOptions<T>): Promise<T[]>;
 	open(): Promise<void>;
 	close(): Promise<void>;
 }

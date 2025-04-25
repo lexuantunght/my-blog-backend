@@ -13,6 +13,7 @@ export const inject = <T>(token: DI.InjectionToken<T>) => DI.inject(token);
 export const singleton = <T>(token: DI.InjectionToken<T>) => {
 	return function (target: constructor<T>) {
 		DI.container.registerSingleton(token, target);
+		console.log('[DI] register singleton', token);
 	};
 };
 
@@ -22,15 +23,13 @@ export const autoRegister = <T>(token: DI.InjectionToken<T>) => {
 	};
 };
 
-const resolve = <T>(token: DI.InjectionToken<T>) => DI.container.resolve(token);
-const registerSingleton = <T>(token: DI.InjectionToken<T>, target: constructor<T>) =>
-	DI.container.registerSingleton(token, target);
-const register = <T>(token: DI.InjectionToken<T>, target: constructor<T>) => DI.container.register(token, target);
-
-const ModuleContainer = {
-	resolve,
-	registerSingleton,
-	register,
-};
+const ModuleContainer = new (class ModuleContainer {
+	resolve = <T>(token: DI.InjectionToken<T>) => DI.container.resolve(token);
+	registerSingleton = <T>(token: DI.InjectionToken<T>, target: constructor<T>) => {
+		DI.container.registerSingleton(token, target);
+		console.log('[DI] register singleton', token);
+	};
+	register = <T>(token: DI.InjectionToken<T>, target: constructor<T>) => DI.container.register(token, target);
+})();
 
 export default ModuleContainer;

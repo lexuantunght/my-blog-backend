@@ -5,7 +5,6 @@ import cors from 'cors';
 import http from 'http';
 import path from 'path';
 import 'express-async-errors';
-import { errorHandler } from 'utils/error-handler';
 import { requestHandler } from 'utils/request-handler';
 import { registerAPIs } from 'apis';
 import AppConfig from 'config/app';
@@ -35,7 +34,7 @@ export function main() {
 	// apis
 	app.use(requestHandler);
 	registerAPIs(app);
-	app.use(errorHandler);
+	//app.use(errorHandler);
 
 	const server = http.createServer(app);
 

@@ -124,7 +124,11 @@ export class DBSQLiteTableAdapter<T> implements DBTableAdapter<T> {
 			this.db.each(
 				this.queryBuilder.createQuery(options),
 				(_err, row) => {
-					rows.push(row as T);
+					if (_err) {
+						reject(_err);
+					} else {
+						rows.push(row as T);
+					}
 				},
 				(err) => {
 					if (err) {
@@ -138,38 +142,71 @@ export class DBSQLiteTableAdapter<T> implements DBTableAdapter<T> {
 	}
 
 	delete(options: DBDeleteOptions<T>) {
-		return new Promise<void>((resolve, reject) => {
-			this.db.run(this.queryBuilder.createDelete(options), (err) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
+		return new Promise<T[]>((resolve, reject) => {
+			const rows: T[] = [];
+			this.db.each(
+				this.queryBuilder.createDelete(options),
+				(err, res) => {
+					if (err) {
+						reject(err);
+					} else {
+						rows.push(res as T);
+					}
+				},
+				(err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(rows);
+					}
 				}
-			});
+			);
 		});
 	}
 
 	update(options: DBUpdateOptions<T>) {
-		return new Promise<void>((resolve, reject) => {
-			this.db.run(this.queryBuilder.createUpdate(options), (err) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
+		return new Promise<T[]>((resolve, reject) => {
+			const rows: T[] = [];
+			this.db.each(
+				this.queryBuilder.createUpdate(options),
+				(err, res) => {
+					if (err) {
+						reject(err);
+					} else {
+						rows.push(res as T);
+					}
+				},
+				(err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(rows);
+					}
 				}
-			});
+			);
 		});
 	}
 
 	insert(options: DBInsertOptions<T>) {
-		return new Promise<void>((resolve, reject) => {
-			this.db.run(this.queryBuilder.createInsert(options), (err) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
+		return new Promise<T[]>((resolve, reject) => {
+			const rows: T[] = [];
+			this.db.each(
+				this.queryBuilder.createInsert(options),
+				(err, res) => {
+					if (err) {
+						reject(err);
+					} else {
+						rows.push(res as T);
+					}
+				},
+				(err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(rows);
+					}
 				}
-			});
+			);
 		});
 	}
 }

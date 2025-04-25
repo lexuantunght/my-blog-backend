@@ -96,10 +96,14 @@ export class DBMongoTableAdapter<T> implements DBTableAdapter<T> {
 			this.dbName,
 			new mongoose.Schema(
 				Object.fromEntries(
-					Object.entries<DBEntityValue>(schema).map(([k, v]) => [k, primitiveTypeToConstructor(v.data.type)])
+					Object.entries<DBEntityValue>(schema)
+						.filter(([k]) => k !== '_id' && k !== 'id')
+						.map(([k, v]) => [k, primitiveTypeToConstructor(v.data.type)])
 				),
 				{
 					timestamps: { createdAt: false, updatedAt: false },
+					id: true,
+					versionKey: false,
 				}
 			)
 		);
@@ -176,19 +180,35 @@ export class DBMongoTableAdapter<T> implements DBTableAdapter<T> {
 	}
 
 	async getAll(options: DBQueryOptions<T>) {
-		const items = await this.db.find(this.queryBuilder.createConditions(options.conditions));
+		const task = this.db.find(this.queryBuilder.createConditions(options.conditions));
+		if (options.orderBy) {
+			const sort = Array.isArray(options.orderBy) ? options.orderBy : [options.orderBy];
+			task.sort(sort.map((s) => (Array.isArray(s) ? s : [s, 'asc'])) as [string, mongoose.SortOrder][]);
+		}
+		if (options.limit) {
+			task.limit(options.limit);
+		}
+		if (options.selector) {
+			const projection = Array.isArray(options.selector) ? options.selector : [options.selector];
+			task.projection(Object.fromEntries(projection.map((k) => [k, 1])));
+		}
+		const items = await task;
 		return items as T[];
 	}
 
 	async delete(options: DBDeleteOptions<T>) {
-		await this.db.deleteOne(this.queryBuilder.createConditions(options.conditions));
+		const res = await this.getAll({ conditions: options.conditions });
+		await this.db.deleteMany(this.queryBuilder.createConditions(options.conditions), { noResponse: false });
+		return res as T[];
 	}
 
 	async update(options: DBUpdateOptions<T>) {
-		await this.db.updateOne(this.queryBuilder.createConditions(options.conditions), options.updater);
+		await this.db.updateMany(this.queryBuilder.createConditions(options.conditions), options.updater);
+		return this.getAll({ conditions: options.conditions });
 	}
 
 	async insert(options: DBInsertOptions<T>) {
-		await this.db.create(options.data);
+		const res = await this.db.create(options.data);
+		return res as T[];
 	}
 }

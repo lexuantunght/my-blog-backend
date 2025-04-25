@@ -3,7 +3,7 @@ import AppConfig from 'config/app';
 const CryptoJS = require('crypto-js');
 
 function createResponse(code = 0, data, msg) {
-	return { error_code: code, data: encodeAES(data), message: msg };
+	return { error_code: code, data: data ? encodeAES(data) : data, message: msg };
 }
 
 function decodeAES(data, retryCount = 0) {
