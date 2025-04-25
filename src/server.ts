@@ -15,7 +15,7 @@ export function main() {
 	app.use(
 		cors({
 			credentials: true,
-			origin: ['*'],
+			origin: AppConfig.allowOrigins,
 		})
 	);
 

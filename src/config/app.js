@@ -18,6 +18,10 @@ const AppConfig = new (class AppConfig {
 	get dbAdapterType() {
 		return 1;
 	}
+
+	get allowOrigins() {
+		return process.env.CORS_ORIGIN?.split(',') || ['*'];
+	}
 })();
 
 export default AppConfig;
