@@ -20,7 +20,7 @@ export function main() {
 	);
 
 	// parse requests of content-type - application/json
-	app.use(bodyParser.json());
+	app.use(bodyParser.text()).use(bodyParser.json());
 
 	app.use(cookieParser());
 
